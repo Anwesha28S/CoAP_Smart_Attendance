@@ -6,8 +6,6 @@ import os
 app = Flask(__name__)
 CSV_FILE = "attendance.csv"
 
-# Global set for ultra-fast, bulletproof duplicate tracking in memory
-# Stores tuples of (DateString, RollNumber)
 logged_today = set()
 
 def load_existing_records():
@@ -26,7 +24,6 @@ def load_existing_records():
                 raw_ts = row[0].strip()
                 raw_id = row[1].strip().upper()
                 
-                # Skip header
                 if raw_id == "STUDENT_ID" or raw_ts.upper() == "TIMESTAMP":
                     continue
                 
@@ -38,7 +35,6 @@ def load_existing_records():
                     
     return records[::-1]
 
-# Initialize CSV file with headers if missing
 if not os.path.exists(CSV_FILE) or os.path.getsize(CSV_FILE) == 0:
     with open(CSV_FILE, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
@@ -124,18 +120,17 @@ def submit():
         # Load latest state from CSV to stay synced with server.py (CoAP)
         load_existing_records()
 
-        # Check in memory set
+        # Checking in memory set
         if (today_date, student_id) in logged_today:
             print(f"[{timestamp}] -> REJECTED DUPLICATE: {student_id}")
             return redirect(url_for('index', msg=f"Roll No. '{student_id}' is ALREADY PRESENT today!", type="warning"))
 
-        # Write entry to CSV with explicit buffer flush
         with open(CSV_FILE, "a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow([timestamp, student_id, "PRESENT"])
             f.flush()
 
-        # Update local set immediately
+
         logged_today.add((today_date, student_id))
         
         print(f"[{timestamp}] -> SUCCESS LOGGED: {student_id}")

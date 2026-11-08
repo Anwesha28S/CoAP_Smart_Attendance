@@ -7,7 +7,6 @@ import aiocoap.resource as resource
 
 CSV_FILE = "attendance.csv"
 
-# In-memory set for fast duplicate tracking: stores (date_string, student_id) tuples
 logged_today = set()
 
 def load_existing_records():
@@ -21,13 +20,13 @@ def load_existing_records():
                     continue
                 raw_ts = row[0].strip()
                 raw_id = row[1].strip().upper()
-                # Skip header
+
                 if raw_id == "STUDENT_ID" or raw_ts.upper() == "TIMESTAMP":
                     continue
                 row_date = raw_ts.split()[0] if " " in raw_ts else raw_ts
                 logged_today.add((row_date, raw_id))
 
-# Create CSV file with header if it doesn't exist
+
 try:
     with open(CSV_FILE, "x", newline="") as f:
         writer = csv.writer(f)
@@ -35,7 +34,6 @@ try:
 except FileExistsError:
     pass
 
-# Load existing records into memory on startup
 load_existing_records()
 
 class AttendanceResource(resource.Resource):
@@ -51,22 +49,20 @@ class AttendanceResource(resource.Resource):
         if not student_id:
             return aiocoap.Message(code=aiocoap.BAD_REQUEST, payload=b"ERROR: Empty ID")
 
-        # Reload CSV to stay in sync with web portal (app.py)
         load_existing_records()
 
-        # Check for duplicate
+  
         if (today_date, student_id) in logged_today:
             print(f"[{timestamp}] -> REJECTED DUPLICATE: {student_id}")
             response_payload = f"DUPLICATE: {student_id} already logged today".encode('utf-8')
             return aiocoap.Message(code=aiocoap.FORBIDDEN, payload=response_payload)
 
-        # Write entry to CSV
+
         with open(CSV_FILE, "a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerow([timestamp, student_id, "PRESENT"])
             f.flush()
 
-        # Update in-memory set immediately
         logged_today.add((today_date, student_id))
         
         print(f"[{timestamp}] -> SUCCESS LOGGED: {student_id}")
@@ -77,7 +73,6 @@ async def main():
     root = resource.Site()
     root.add_resource(['attendance'], AttendanceResource())
 
-    # Playit forwards traffic to this machine's loopback interface.
     await aiocoap.Context.create_server_context(root, bind=('127.0.0.1', 5683))
     print("---------------------------------------------------------")
     print("CoAP Attendance Server running locally on UDP port 5683...")
