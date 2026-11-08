@@ -75,9 +75,9 @@ Then open:
 ```text
 http://localhost:5000
 ```
-### 🎮 Live Hardware Simulation
+### Live Hardware Simulation
 You can run and test the ESP32 CoAP hardware simulation directly in your browser:
-👉 **[Click here to open Wokwi ESP32 Simulation](https://wokwi.com/projects/479829434475947009)**
+**[Wokwi ESP32 Simulation](https://wokwi.com/projects/479829434475947009)**
 ### 3. Submit attendance
 
 - Manual entry: use the form on the web page
