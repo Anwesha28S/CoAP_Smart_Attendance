@@ -34,7 +34,6 @@ IoT proj/
 ├── attendance.csv     # Central attendance data store
 ├── requirements.txt   # Python dependencies
 ├── README.md          # Project documentation
-└── (optional) Wokwi sketch or ESP32 code for hardware simulation
 ```
 
 ## Prerequisites
@@ -108,7 +107,7 @@ The attendance file is stored as CSV with the following columns:
 
 ```csv
 Timestamp,Student_ID,Status
-2026-11-08 09:15:00,124CS0003,PRESENT
+2026-11-08 09:15:00,124CS0058,PRESENT
 ```
 
 The app checks whether a student has already marked attendance on the current date and rejects duplicate entries.
