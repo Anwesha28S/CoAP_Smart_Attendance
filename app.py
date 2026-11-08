@@ -77,6 +77,8 @@ def is_already_present(student_id, today_date):
         return False
         
     target_id = str(student_id).strip().upper()
+    # Ensure today_date only contains the 'YYYY-MM-DD' part
+    target_date = str(today_date).split()[0].strip()
     
     with open(CSV_FILE, "r") as f:
         reader = csv.reader(f)
@@ -87,15 +89,18 @@ def is_already_present(student_id, today_date):
             raw_timestamp = row[0].strip()
             raw_id = row[1].strip().upper()
             
-            if raw_id == "STUDENT_ID":
+            # Skip CSV header
+            if raw_id == "STUDENT_ID" or raw_timestamp.upper() == "TIMESTAMP":
                 continue
                 
-            row_date = raw_timestamp.split()[0] if " " in raw_timestamp else raw_timestamp
+            # Extract YYYY-MM-DD from the timestamp column
+            row_date = raw_timestamp.split()[0].strip() if " " in raw_timestamp else raw_timestamp
             
-            print(f"[CHECK] Target: '{target_id}' vs Row ID: '{raw_id}' | Today: '{today_date}' vs Row Date: '{row_date}'")
+            print(f"[CHECK] Target ID: '{target_id}' == Row ID: '{raw_id}' | Target Date: '{target_date}' == Row Date: '{row_date}'")
             
-            if raw_id == target_id and row_date == today_date:
+            if raw_id == target_id and row_date == target_date:
                 return True
+                
     return False
 
 @app.route('/')
